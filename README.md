@@ -136,26 +136,10 @@ sh ./installers/install-skill.sh --scope repo --target-repo /path/to/your/projec
 
 ---
 
-## 从旧版本迁移 (Migration from Legacy v2)
-
-如果你之前使用旧版 `installers/install.ps1` 或 `install.sh` 安装过 AWT：
-
-1. **清理全局 Agent 指令文件中的注入规则**：
-   打开以下文件，删除 `<!-- agent-worktree:begin -->` 至 `<!-- agent-worktree:end -->` 之间的标记块：
-   - Codex: `~/.codex/AGENTS.md` (或 `$CODEX_HOME/AGENTS.md`)
-   - Claude Code: `~/.claude/CLAUDE.md`
-   - OpenCode: `~/.config/opencode/AGENTS.md`
-2. **清理 PATH（可选）**：
-   无需保留 `LOCALAPPDATA/AgentWorktree/bin` 或 `~/.local/share/agent-worktree/bin` 在系统 `PATH` 中。
-3. **安装新版 Skill**：
-   运行 `./installers/install-skill.ps1 -Scope global`（或 `.sh`），Agent 将仅在实际触发工作流时按需激活 Skill。
-
----
-
 ## 目录结构 (Repository Layout)
 
 ```text
-skills/agent-worktree/   # Skill 源码树 (不提交平台二进制)
+skills/agent-worktree/         # Skill 源码树 (不提交平台二进制)
 ├── SKILL.md                   # 精炼的高层编排规范 (Workflow Brain)
 ├── scripts/
 │   ├── awt.ps1                # 跨平台引导层 (PowerShell)
@@ -181,9 +165,7 @@ internal/                      # Core 业务逻辑与唯一安全边界
 
 installers/                    # 安装与分发工具
 ├── install-skill.ps1          # 原生 Skill 安装器 (Windows)
-├── install-skill.sh           # 原生 Skill 安装器 (Linux/macOS)
-├── install.ps1                # [Deprecated] 旧版全局安装器
-└── install.sh                 # [Deprecated] 旧版全局安装器
+└── install-skill.sh           # 原生 Skill 安装器 (Linux/macOS)
 ```
 
 ---

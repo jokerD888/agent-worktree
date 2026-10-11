@@ -351,7 +351,7 @@ func outputWriter(value any, jsonOutput bool, stdout io.Writer) error {
 }
 
 func printHelp(w io.Writer) {
-	fmt.Fprint(w, `AWT v2 (development)
+	fmt.Fprint(w, `Agent Worktree (AWT)
 
 Usage:
   awt setup | doctor [--json]

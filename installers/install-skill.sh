@@ -99,7 +99,7 @@ get_target_paths() {
 
   if [ "$scope" = "global" ]; then
     anti_official="$HOME/.gemini/config/skills/agent-worktree"
-    anti_legacy="$HOME/.gemini/antigravity/skills/agent-worktree"
+    anti_ide="$HOME/.gemini/antigravity/skills/agent-worktree"
     codex_home="${CODEX_HOME:-"$HOME/.codex"}/skills/agent-worktree"
     claude_home="$HOME/.claude/skills/agent-worktree"
     opencode_home="${XDG_CONFIG_HOME:-"$HOME/.config"}/opencode/skills/agent-worktree"
@@ -108,7 +108,7 @@ get_target_paths() {
     case "$host" in
       antigravity)
         echo "$anti_official"
-        echo "$anti_legacy"
+        echo "$anti_ide"
         ;;
       codex) echo "$codex_home" ;;
       claude) echo "$claude_home" ;;
@@ -116,7 +116,7 @@ get_target_paths() {
       generic) echo "$generic_home" ;;
       all)
         echo "$anti_official"
-        echo "$anti_legacy"
+        echo "$anti_ide"
         echo "$codex_home"
         echo "$claude_home"
         echo "$opencode_home"

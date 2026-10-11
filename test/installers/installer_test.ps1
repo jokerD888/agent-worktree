@@ -19,14 +19,14 @@ try {
     # Test Global Installation for Antigravity (checks official config path)
     & $installerPs1 -Scope global -HostTarget antigravity -Force
     $antiOfficial = Join-Path $tempHome '.gemini\config\skills\agent-worktree\SKILL.md'
-    $antiLegacy = Join-Path $tempHome '.gemini\antigravity\skills\agent-worktree\SKILL.md'
+    $antiIde = Join-Path $tempHome '.gemini\antigravity\skills\agent-worktree\SKILL.md'
     if (-not (Test-Path -LiteralPath $antiOfficial)) {
         throw "Official Antigravity skill path was not installed at: $antiOfficial"
     }
-    if (-not (Test-Path -LiteralPath $antiLegacy)) {
-        throw "Legacy Antigravity skill path was not installed at: $antiLegacy"
+    if (-not (Test-Path -LiteralPath $antiIde)) {
+        throw "Antigravity IDE skill path was not installed at: $antiIde"
     }
-    Write-Host "PASS: Global antigravity official and fallback skills installed"
+    Write-Host "PASS: Global antigravity skills installed"
 
     # Test Global Installation for Codex
     & $installerPs1 -Scope global -HostTarget codex -Force

@@ -5,10 +5,5 @@ dist/
 *.test
 coverage.out
 
-# VS Code extension build outputs
-vscode-extension/out/
-vscode-extension/*.vsix
-vscode-extension/node_modules/
-
 # Local AWT state
 .git/awt/
