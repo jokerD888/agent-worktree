@@ -1,11 +1,11 @@
-# ARW for OpenCode
+# AWT for OpenCode
 
-Use the local `arw-mcp` server's typed `workflow_*` tools only for clear ARW
-intents. Questions, throwaway work, and a user statement such as "这次不用 ARW"
-are non-ARW for the current conversation; ask once only if delivery scope is
+Use the local `awt-mcp` server's typed `workflow_*` tools only for clear AWT
+intents. Questions, throwaway work, and a user statement such as "这次不用 AWT"
+are non-AWT for the current conversation; ask once only if delivery scope is
 unclear. For an opted-in task, read `workflow_get_task`; before calling
 `workflow_start_task`, briefly propose the intended task id, branch
-(`arw/<id>`), and worktree path and let the user confirm or rename; do not
+(`awt/<id>`), and worktree path and let the user confirm or rename; do not
 create a task silently. For a dependent child task, explain that it can be
 inspected but cannot receive final approval until the parent is approved. Never
 treat the agent's own judgment as approval. Use `workflow_approve_task` only for

@@ -11,8 +11,8 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v6
         with: { go-version: "1.26.x" }
-      - name: Build local arw binary
-        run: go build -o bin/arw.exe ./cmd/arw
+      - name: Build local awt binary
+        run: go build -o bin/awt.exe ./cmd/awt
       - name: Run PowerShell wrapper tests
         shell: pwsh
         run: ./test/wrapper/wrapper_test.ps1
@@ -26,8 +26,8 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v6
         with: { go-version: "1.26.x" }
-      - name: Build local arw binary
-        run: go build -o bin/arw ./cmd/arw
+      - name: Build local awt binary
+        run: go build -o bin/awt ./cmd/awt
       - name: Run POSIX wrapper tests
         shell: bash
         run: bash ./test/wrapper/wrapper_test.sh
@@ -42,11 +42,11 @@ jobs:
       - name: Validate release installer in an isolated profile
         shell: pwsh
         run: |
-          $testRoot = Join-Path $env:RUNNER_TEMP 'arw-release-installer-test'
+          $testRoot = Join-Path $env:RUNNER_TEMP 'awt-release-installer-test'
           $fixture = @{
-            'arw_windows_amd64.exe' = [Text.Encoding]::UTF8.GetBytes('arw')
-            'arw-mcp_windows_amd64.exe' = [Text.Encoding]::UTF8.GetBytes('arw-mcp')
-            'arw-global-rules.md' = [Text.Encoding]::UTF8.GetBytes('# test rules')
+            'awt_windows_amd64.exe' = [Text.Encoding]::UTF8.GetBytes('awt')
+            'awt-mcp_windows_amd64.exe' = [Text.Encoding]::UTF8.GetBytes('awt-mcp')
+            'awt-global-rules.md' = [Text.Encoding]::UTF8.GetBytes('# test rules')
           }
           $manifest = ($fixture.GetEnumerator() | ForEach-Object { "{0}  {1}" -f [Convert]::ToHexString([Security.Cryptography.SHA256]::HashData($_.Value)).ToLowerInvariant(), $_.Key }) -join "`n"
           $fixture['checksums.txt'] = [Text.Encoding]::UTF8.GetBytes("$manifest`n")
@@ -60,10 +60,10 @@ jobs:
           $env:USERPROFILE = Join-Path $testRoot 'home'
           $env:CODEX_HOME = Join-Path $testRoot 'codex'
           $originalPath = [Environment]::GetEnvironmentVariable('Path', 'User')
-          $binDirectory = Join-Path $env:LOCALAPPDATA 'AgentReviewWorkflow\bin'
+          $binDirectory = Join-Path $env:LOCALAPPDATA 'AgentWorktree\bin'
           try {
             ./installers/install.ps1 -Version test -ConfigureAgents -Force
-            if (-not (Test-Path -LiteralPath (Join-Path $binDirectory 'arw.exe'))) { throw 'Release installer did not install arw.exe.' }
+            if (-not (Test-Path -LiteralPath (Join-Path $binDirectory 'awt.exe'))) { throw 'Release installer did not install awt.exe.' }
             if (-not (Test-Path -LiteralPath (Join-Path $env:CODEX_HOME 'config.toml'))) { throw 'Release installer did not respect CODEX_HOME.' }
           } finally {
             [Environment]::SetEnvironmentVariable('Path', $originalPath, 'User')
@@ -82,10 +82,10 @@ jobs:
           fixture="$test_root/fixture"
           mock_bin="$test_root/mock-bin"
           mkdir -p "$fixture" "$mock_bin" "$test_root/home"
-          printf 'arw' > "$fixture/arw_linux_amd64"
-          printf 'arw-mcp' > "$fixture/arw-mcp_linux_amd64"
-          printf '# test rules\n' > "$fixture/arw-global-rules.md"
-          (cd "$fixture" && sha256sum arw_linux_amd64 arw-mcp_linux_amd64 arw-global-rules.md > checksums.txt)
+          printf 'awt' > "$fixture/awt_linux_amd64"
+          printf 'awt-mcp' > "$fixture/awt-mcp_linux_amd64"
+          printf '# test rules\n' > "$fixture/awt-global-rules.md"
+          (cd "$fixture" && sha256sum awt_linux_amd64 awt-mcp_linux_amd64 awt-global-rules.md > checksums.txt)
           cat > "$mock_bin/curl" <<'EOF'
           #!/usr/bin/env bash
           set -euo pipefail
@@ -94,14 +94,14 @@ jobs:
           while [ "$#" -gt 0 ]; do
             if [ "$1" = '-o' ]; then output=$2; shift 2; else url=$1; shift; fi
           done
-          cp "$ARW_INSTALLER_FIXTURE/${url##*/}" "$output"
+          cp "$AWT_INSTALLER_FIXTURE/${url##*/}" "$output"
           EOF
           chmod +x "$mock_bin/curl"
           release_home="$test_root/home"
           data_home="$test_root/data"
           config_home="$test_root/config"
           codex_home="$test_root/codex"
-          HOME="$release_home" XDG_DATA_HOME="$data_home" XDG_CONFIG_HOME="$config_home" CODEX_HOME="$codex_home" ARW_INSTALLER_FIXTURE="$fixture" PATH="$mock_bin:/usr/bin:/bin" bash ./installers/install.sh --version test --configure-agents --force
-          test -x "$data_home/agent-review-workflow/bin/arw"
+          HOME="$release_home" XDG_DATA_HOME="$data_home" XDG_CONFIG_HOME="$config_home" CODEX_HOME="$codex_home" AWT_INSTALLER_FIXTURE="$fixture" PATH="$mock_bin:/usr/bin:/bin" bash ./installers/install.sh --version test --configure-agents --force
+          test -x "$data_home/agent-worktree/bin/awt"
           test -f "$codex_home/AGENTS.md"
-          grep -Fqx "export PATH=\"$data_home/agent-review-workflow/bin:\$PATH\"" "$release_home/.profile"
+          grep -Fqx "export PATH=\"$data_home/agent-worktree/bin:\$PATH\"" "$release_home/.profile"

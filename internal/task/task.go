@@ -60,8 +60,8 @@ func (t Task) Validate() error {
 	if strings.TrimSpace(t.Title) == "" {
 		return fmt.Errorf("task title is required")
 	}
-	if t.Branch != "arw/"+t.ID {
-		return fmt.Errorf("task branch must be arw/%s", t.ID)
+	if t.Branch != "awt/"+t.ID {
+		return fmt.Errorf("task branch must be awt/%s", t.ID)
 	}
 	if strings.TrimSpace(t.Base.Ref) == "" {
 		return fmt.Errorf("base ref is required")

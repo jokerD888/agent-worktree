@@ -10,5 +10,5 @@ vscode-extension/out/
 vscode-extension/*.vsix
 vscode-extension/node_modules/
 
-# Local ARW state
-.git/arw/
+# Local AWT state
+.git/awt/

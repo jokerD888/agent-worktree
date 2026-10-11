@@ -18,7 +18,7 @@ if ($IsWindows -or ($env:OS -eq 'Windows_NT')) {
         'Darwin' { $os = 'darwin' }
         'MINGW|MSYS|CYGWIN' { $os = 'windows'; $ext = '.exe' }
         default {
-            [Console]::Error.WriteLine("arw: unsupported operating system '$uname'")
+            [Console]::Error.WriteLine("awt: unsupported operating system '$uname'")
             exit 1
         }
     }
@@ -49,7 +49,7 @@ switch ($rawArch.ToLowerInvariant()) {
                     'aarch64' { $arch = 'arm64' }
                     'arm64' { $arch = 'arm64' }
                     default {
-                        [Console]::Error.WriteLine("arw: unsupported architecture: $rawArch / $envArch / $m")
+                        [Console]::Error.WriteLine("awt: unsupported architecture: $rawArch / $envArch / $m")
                         exit 1
                     }
                 }
@@ -59,11 +59,11 @@ switch ($rawArch.ToLowerInvariant()) {
 }
 
 $platform = "$os-$arch"
-$binName = "arw$ext"
+$binName = "awt$ext"
 $target = Join-Path $SkillRoot (Join-Path 'bin' (Join-Path $platform $binName))
 
 if (-not (Test-Path -LiteralPath $target)) {
-    [Console]::Error.WriteLine("arw binary for platform '$platform' not found at: $target")
+    [Console]::Error.WriteLine("awt binary for platform '$platform' not found at: $target")
     exit 127
 }
 

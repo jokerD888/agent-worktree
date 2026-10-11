@@ -5,8 +5,8 @@ import (
 	"strings"
 	"time"
 
-	gitclient "github.com/jokerD888/agent-review-workflow/internal/git"
-	"github.com/jokerD888/agent-review-workflow/internal/task"
+	gitclient "github.com/jokerD888/agent-worktree/internal/git"
+	"github.com/jokerD888/agent-worktree/internal/task"
 )
 
 type DependencyStatus string

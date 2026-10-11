@@ -1,12 +1,12 @@
-# Agent Review Workflow 最终方案设计
+# Agent Worktree 最终方案设计
 
 > 状态：已确认的目标架构，供后续实现窗口直接执行。  
 > 版本：v2 设计稿。  
-> 重要：本文是 v2 的目标架构，不是实现状态清单。以 README、源码和测试为准；ARW 不提供 VS Code 扩展，代码 diff 复用 VS Code Source Control 或 GitLens。
+> 重要：本文是 v2 的目标架构，不是实现状态清单。以 README、源码和测试为准；AWT 不提供 VS Code 扩展，代码 diff 复用 VS Code Source Control 或 GitLens。
 
 ## 1. 目标与边界
 
-Agent Review Workflow（ARW）让开发者以自然语言管理 AI 编写代码的任务，并在 IDE 中高效审查完整变更。
+Agent Worktree（AWT）让开发者以自然语言管理 AI 编写代码的任务，并在 IDE 中高效审查完整变更。
 
 它要解决的是：AI 可能很快地改了许多代码，但人需要始终清楚知道“哪个任务改了什么、相对什么基准改、能否审、依赖谁、审查结论是否仍有效”。
 
@@ -16,7 +16,7 @@ Agent Review Workflow（ARW）让开发者以自然语言管理 AI 编写代码�
 - 每个任务保存分支、基准提交、单一父任务、生命周期和人工审查结论。
 - 支持独立任务和堆叠任务（例如 `main <- A <- B`）。
 - 在 Codex、Claude Code、OpenCode 中用自然语言触发受限的工作流操作。
-- 在 Windows 和 Linux 上使用同一个短命令 `arw`，且不依赖保留本地源码仓库。
+- 在 Windows 和 Linux 上使用同一个短命令 `awt`，且不依赖保留本地源码仓库。
 - 输出精确的审查 base/head SHA，使开发者可在 VS Code Source Control 或 GitLens 中查看正确范围的 diff。
 - 不操纵编辑器窗口；审查材料只返回 worktree 路径与精确的比较范围。
 - 审查、合并、推送和代码改写都有可审计、可确认的边界。
@@ -24,9 +24,9 @@ Agent Review Workflow（ARW）让开发者以自然语言管理 AI 编写代码�
 ### 1.2 明确不做的事
 
 - 不让 AI 仅凭自身判断批准或合并任务，也不允许其自行推送、rebase、reset、强推、删除分支或删除 worktree。用户明确表达批准或本地合并意图后，Agent 可以调用对应的受限工具代为执行。
-- 不提供 `run_arw("任意 shell 文本")` 这类泛化的 Agent 工具。
+- 不提供 `run_awt("任意 shell 文本")` 这类泛化的 Agent 工具。
 - 不用鼠标/屏幕自动化操纵 VS Code 内部 UI。
-- 不构建或维护自定义 IDE diff 界面；ARW 复用开发者已有的 Git 工具。
+- 不构建或维护自定义 IDE diff 界面；AWT 复用开发者已有的 Git 工具。
 - 不把 `.env`、令牌、数据库密码、完整源代码 diff 上传到中心服务；系统是本地优先的。
 
 ## 2. 总体架构
@@ -38,9 +38,9 @@ Codex / Claude Code / OpenCode
         |
 统一规则与各自的 Skill/适配配置
         |
-ARW MCP（仅暴露结构化、受限的任务工具）
+AWT MCP（仅暴露结构化、受限的任务工具）
         |
-arw 核心程序（唯一的任务与 Git 业务实现）
+awt 核心程序（唯一的任务与 Git 业务实现）
         |--------------------|
         |                    |
 Git / worktree         任务台账元数据分支
@@ -52,9 +52,9 @@ Git / worktree         任务台账元数据分支
 
 | 层 | 技术 | 决策理由 |
 | --- | --- | --- |
-| 核心 CLI `arw` | Go | Windows/Linux 独立二进制、安装简单、适合可靠调度 Git 命令。 |
-| MCP 服务 `arw-mcp` | Go | 与核心共享同一状态机和校验，避免再维护一套 Node 业务逻辑。 |
-| 差异查看 | VS Code Source Control / GitLens | 复用成熟 Git UI；ARW 只提供任务上下文和精确 SHA。 |
+| 核心 CLI `awt` | Go | Windows/Linux 独立二进制、安装简单、适合可靠调度 Git 命令。 |
+| MCP 服务 `awt-mcp` | Go | 与核心共享同一状态机和校验，避免再维护一套 Node 业务逻辑。 |
+| 差异查看 | VS Code Source Control / GitLens | 复用成熟 Git UI；AWT 只提供任务上下文和精确 SHA。 |
 | 安装器 | PowerShell + POSIX Shell | 仅下载、校验、配置和迁移；不承载业务逻辑。 |
 | 层间契约 | JSON Schema | CLI、MCP 和测试共同使用的稳定数据模型。 |
 
@@ -122,7 +122,7 @@ active -> ready_for_review -> merged
 schema_version: 1
 id: fix-login-redirect
 title: 修复登录跳转
-branch: arw/fix-login-redirect
+branch: awt/fix-login-redirect
 base:
   ref: main
   sha: 1a2b3c4d
@@ -140,10 +140,10 @@ updated_at: 2026-08-12T11:00:00+08:00
 
 ### 5.1 采用专用元数据分支
 
-任务记录保存在同一仓库的专用分支 `arw/registry` 中，例如：
+任务记录保存在同一仓库的专用分支 `awt/registry` 中，例如：
 
 ```text
-.agent-review/
+.agent-worktree/
   tasks/
     fix-login-redirect.yaml
     add-search.yaml
@@ -157,11 +157,11 @@ updated_at: 2026-08-12T11:00:00+08:00
 - 每个任务独立文件，冲突范围较小。
 - CLI 可通过读取该分支列出所有任务，而不需要从模糊的分支名猜测状态。
 
-`arw` 内部维护该分支；用户无需日常 checkout 它。元数据的发布和同步必须是明确动作，不能被 Agent 静默推送。
+`awt` 内部维护该分支；用户无需日常 checkout 它。元数据的发布和同步必须是明确动作，不能被 Agent 静默推送。
 
 ### 5.2 本地状态
 
-本机特有信息放在 Git 忽略的位置，例如 `.git/arw/`：
+本机特有信息放在 Git 忽略的位置，例如 `.git/awt/`：
 
 - worktree 的绝对路径；
 - 当前工作区占用锁；
@@ -176,8 +176,8 @@ updated_at: 2026-08-12T11:00:00+08:00
 
 ```text
 main
- ├─ arw/fix-login-redirect
- └─ arw/fix-database
+ ├─ awt/fix-login-redirect
+ └─ awt/fix-database
 ```
 
 两个任务均从创建时记录的 `main@SHA` 开始，彼此独立，可按任意顺序审查。
@@ -187,7 +187,7 @@ main
 当 B 必须使用 A 中尚未合入的接口或代码时：
 
 ```text
-main <- arw/feature-a <- arw/feature-b
+main <- awt/feature-a <- awt/feature-b
 ```
 
 规则：
@@ -224,8 +224,8 @@ C:\code\my-app-worktrees\
 规则：
 
 - 一个任务对应一个 worktree；一个 worktree 同一时刻只允许一个写入 Agent。
-- `arw task start` 在当前项目的配置位置创建任务 worktree。
-- 当前 VS Code 窗口通常就是当前任务的 worktree；ARW 不会因审查其他任务而切换或打开窗口。
+- `awt task start` 在当前项目的配置位置创建任务 worktree。
+- 当前 VS Code 窗口通常就是当前任务的 worktree；AWT 不会因审查其他任务而切换或打开窗口。
 - 不自动 stash 未提交改动。开始新任务或切换上下文时，如工作区不干净，必须报告并要求用户决定。
 - `.env`、数据库、端口、生成依赖不由 Git worktree 自动复制。任务可声明运行前置条件，避免不同 worktree 争用同一数据库或端口。
 
@@ -252,24 +252,24 @@ B 依赖 A；推荐先审 A。
 
 这只是建议，不是强制。用户有权先审 B。
 
-## 9. `arw` CLI 和机器接口
+## 9. `awt` CLI 和机器接口
 
 面向人类的命令保持简短；面向 MCP 的输出使用稳定 JSON。
 
 ```text
-arw setup
-arw doctor
-arw task start "修复登录跳转"
-arw task list [--view reviewable|active|parked|blocked]
-arw task show <task-id>
-arw task park <task-id>
-arw task resume <task-id>
-arw task merge --confirm <task-id>
-arw task abandon --confirm <task-id>
+awt setup
+awt doctor
+awt task start "修复登录跳转"
+awt task list [--view reviewable|active|parked|blocked]
+awt task show <task-id>
+awt task park <task-id>
+awt task resume <task-id>
+awt task merge --confirm <task-id>
+awt task abandon --confirm <task-id>
 
-arw review prepare <task-id>
-arw review approve --confirm --base <reviewed-base-sha> --head <reviewed-head-sha> <task-id>
-arw review request-changes <task-id> [--reason text]
+awt review prepare <task-id>
+awt review approve --confirm --base <reviewed-base-sha> --head <reviewed-head-sha> <task-id>
+awt review request-changes <task-id> [--reason text]
 ```
 
 所有可供程序消费的子命令支持：
@@ -278,7 +278,7 @@ arw review request-changes <task-id> [--reason text]
 --format json
 ```
 
-例如 `arw review prepare fix-login-redirect --format json` 至少返回：
+例如 `awt review prepare fix-login-redirect --format json` 至少返回：
 
 ```json
 {
@@ -299,7 +299,7 @@ arw review request-changes <task-id> [--reason text]
 
 ## 10. MCP 与多 Agent 接入
 
-`arw-mcp` 是本机 stdio MCP 服务。它包装核心库，不复制 Git 逻辑。
+`awt-mcp` 是本机 stdio MCP 服务。它包装核心库，不复制 Git 逻辑。
 
 允许暴露的工具：
 
@@ -336,19 +336,19 @@ git branch --delete
 各 Agent 的适配层负责：
 
 - 安装统一的安全规则和自然语言映射；
-- 配置本地 `arw-mcp`；
+- 配置本地 `awt-mcp`；
 - 告知 Agent：已知任务先读取 `workflow_get_task`，未知任务用 `workflow_list_tasks`；
 - 使 Codex、Claude Code、OpenCode 调用同一组工具和同一状态机。
 
 ## 11. 审查界面边界
 
-ARW 不实现自定义 VS Code 扩展，也不试图替代 Git 的历史和 diff 界面。`arw review prepare <task-id>` 即时返回本次审查的精确 `base SHA` 和 `head SHA`，以及任务、依赖和风险上下文；该查询不写入台账。
+AWT 不实现自定义 VS Code 扩展，也不试图替代 Git 的历史和 diff 界面。`awt review prepare <task-id>` 即时返回本次审查的精确 `base SHA` 和 `head SHA`，以及任务、依赖和风险上下文；该查询不写入台账。
 
 - 常规任务审查：在对应 task worktree 中使用 VS Code Source Control / Source Control Graph，对比任务分支与记录的 base 分支或提交。
 - 任意两个历史提交的全量比较：使用 GitLens 或 `git diff <base-sha> <head-sha>`。
-- 审查结论：仍由用户通过对话明确表达，ARW/MCP 把批准绑定到实际查看的 base/head；展示工具不负责改变任务状态。
+- 审查结论：仍由用户通过对话明确表达，AWT/MCP 把批准绑定到实际查看的 base/head；展示工具不负责改变任务状态。
 
-因此，ARW 的价值是“审查结论和合并约束”，不是“再造一个 diff 面板”。
+因此，AWT 的价值是“审查结论和合并约束”，不是“再造一个 diff 面板”。
 
 ## 12. 安全、确认与审计
 
@@ -381,10 +381,10 @@ ARW 不实现自定义 VS Code 扩展，也不试图替代 Git 的历史和 diff
 
 ```text
 GitHub Release
-├─ arw_windows_amd64.exe
-├─ arw_linux_amd64
-├─ arw_linux_arm64
-├─ arw-mcp_...
+├─ awt_windows_amd64.exe
+├─ awt_linux_amd64
+├─ awt_linux_arm64
+├─ awt-mcp_...
 └─ checksums.txt / provenance
 ```
 
@@ -400,22 +400,22 @@ GitHub Release
 
 | 平台 | 位置 |
 | --- | --- |
-| Windows | `%LOCALAPPDATA%\\AgentReviewWorkflow` |
-| Linux | `$XDG_DATA_HOME/agent-review-workflow`，默认 `~/.local/share/agent-review-workflow` |
+| Windows | `%LOCALAPPDATA%\\AgentWorktree` |
+| Linux | `$XDG_DATA_HOME/agent-worktree`，默认 `~/.local/share/agent-worktree` |
 
 升级必须显式重跑版本固定的安装器，并显示版本、校验结果和变更摘要。不得从 GitHub `main` 分支直接下载并执行未经版本固定的业务脚本。
 
 ## 14. 仓库结构
 
 ```text
-agent-review-workflow/
+agent-worktree/
 ├─ cmd/
-│  ├─ arw/                     Go CLI 入口
-│  └─ arw-mcp/                 Go MCP server 入口
+│  ├─ awt/                     Go CLI 入口
+│  └─ awt-mcp/                 Go MCP server 入口
 ├─ internal/
 │  ├─ git/                     Git 命令封装与安全校验
 │  ├─ task/                    状态机与任务模型
-│  ├─ ledger/                  arw/registry 读写与同步
+│  ├─ ledger/                  awt/registry 读写与同步
 │  ├─ review/                  审查快照、比较范围、失效规则
 │  └─ worktree/                worktree 创建、发现、锁定
 ├─ schemas/                    JSON Schema 与契约测试样本
@@ -440,7 +440,7 @@ agent-review-workflow/
 ### Phase 1：Go Core MVP
 
 - 实现 `doctor`、任务创建、任务列表、任务详情、worktree 创建。
-- 建立 `arw/registry` 并写入/读取 YAML 任务记录。
+- 建立 `awt/registry` 并写入/读取 YAML 任务记录。
 - 验收：Windows/Linux 可从 Release 安装；创建独立任务后可恢复其信息。
 
 ### Phase 2：审查快照与依赖图
@@ -484,4 +484,4 @@ agent-review-workflow/
 5. 返回目标 worktree 与精确的 base/head SHA，用户用 VS Code Source Control 或 GitLens 查看变更；
 7. 在用户未单独要求时不 merge，并且不自行 push、rebase、reset 或删除任何工作内容。
 
-满足这一场景，即说明 ARW 的核心价值已真正落地。
+满足这一场景，即说明 AWT 的核心价值已真正落地。

@@ -64,8 +64,8 @@ func TestHelpOutput(t *testing.T) {
 func TestCLIInGitRepo(t *testing.T) {
 	root := t.TempDir()
 	runGit(t, root, "init", "--initial-branch=main")
-	runGit(t, root, "config", "user.name", "ARW Test")
-	runGit(t, root, "config", "user.email", "arw-test@example.invalid")
+	runGit(t, root, "config", "user.name", "AWT Test")
+	runGit(t, root, "config", "user.email", "awt-test@example.invalid")
 	runGit(t, root, "commit", "--allow-empty", "-m", "initial")
 
 	origWd, err := os.Getwd()

@@ -3,7 +3,7 @@ set -eu
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "$0")" && pwd)"
 REPO_ROOT="$(cd -- "$SCRIPT_DIR/../.." && pwd)"
-WRAPPER="$REPO_ROOT/skills/agent-review-workflow/scripts/arw.sh"
+WRAPPER="$REPO_ROOT/skills/agent-worktree/scripts/awt.sh"
 
 echo "Running POSIX wrapper tests..."
 
@@ -15,12 +15,12 @@ TMP_DIR="$(mktemp -d)"
 trap 'rm -rf "$TMP_DIR"' EXIT INT TERM
 
 mkdir -p "$TMP_DIR/scripts"
-cp "$WRAPPER" "$TMP_DIR/scripts/arw.sh"
-chmod +x "$TMP_DIR/scripts/arw.sh"
+cp "$WRAPPER" "$TMP_DIR/scripts/awt.sh"
+chmod +x "$TMP_DIR/scripts/awt.sh"
 
 # Test 1: Missing binary exits with 127
 set +e
-"$TMP_DIR/scripts/arw.sh" version 2>"$TMP_DIR/err.txt"
+"$TMP_DIR/scripts/awt.sh" version 2>"$TMP_DIR/err.txt"
 EXIT_CODE=$?
 set -e
 
@@ -55,8 +55,8 @@ PLATFORM="${OS}-${ARCH}"
 BIN_DIR="$TMP_DIR/bin/$PLATFORM"
 mkdir -p "$BIN_DIR"
 
-# Mock arw binary
-cat <<'EOF' > "$BIN_DIR/arw"
+# Mock awt binary
+cat <<'EOF' > "$BIN_DIR/awt"
 #!/usr/bin/env sh
 if [ "$1" = "version" ]; then
   echo '{"version":"0.2.0-dev"}'
@@ -69,10 +69,10 @@ fi
 echo "unknown" >&2
 exit 1
 EOF
-chmod +x "$BIN_DIR/arw"
+chmod +x "$BIN_DIR/awt"
 
 # Test argument forwarding and stdout
-OUT="$("$TMP_DIR/scripts/arw.sh" version)"
+OUT="$("$TMP_DIR/scripts/awt.sh" version)"
 if [ "$OUT" != '{"version":"0.2.0-dev"}' ]; then
   echo "Test 2 failed: Expected '{\"version\":\"0.2.0-dev\"}', got '$OUT'" >&2
   exit 1
@@ -81,7 +81,7 @@ echo "PASS: Test 2 - Forward arguments and stdout"
 
 # Test exit code preservation
 set +e
-"$TMP_DIR/scripts/arw.sh" fail 2>/dev/null
+"$TMP_DIR/scripts/awt.sh" fail 2>/dev/null
 EXIT_CODE=$?
 set -e
 

@@ -42,12 +42,12 @@ elif [ -f "$SCRIPT_DIR/SKILL.md" ]; then
   REPO_ROOT="$SOURCE_SKILL"
 else
   REPO_ROOT="$(cd -- "$SCRIPT_DIR/.." && pwd)"
-  if [ -f "$REPO_ROOT/dist/agent-review-workflow/SKILL.md" ]; then
-    SOURCE_SKILL="$REPO_ROOT/dist/agent-review-workflow"
-  elif [ -f "$REPO_ROOT/skills/agent-review-workflow/SKILL.md" ]; then
-    SOURCE_SKILL="$REPO_ROOT/skills/agent-review-workflow"
+  if [ -f "$REPO_ROOT/dist/agent-worktree/SKILL.md" ]; then
+    SOURCE_SKILL="$REPO_ROOT/dist/agent-worktree"
+  elif [ -f "$REPO_ROOT/skills/agent-worktree/SKILL.md" ]; then
+    SOURCE_SKILL="$REPO_ROOT/skills/agent-worktree"
   else
-    echo "Error: Could not locate agent-review-workflow skill source files." >&2
+    echo "Error: Could not locate agent-worktree skill source files." >&2
     exit 1
   fi
 fi
@@ -69,9 +69,9 @@ case "$UNAME_M" in
 esac
 
 PLATFORM="${OS}-${ARCH}"
-BIN_NAME="arw"
+BIN_NAME="awt"
 if [ "$OS" = "windows" ]; then
-  BIN_NAME="arw.exe"
+  BIN_NAME="awt.exe"
 fi
 
 HAS_PREBUILT_BIN=0
@@ -85,9 +85,9 @@ if [ -f "$REPO_ROOT/bin/$BIN_NAME" ]; then
 fi
 
 if [ "$HAS_PREBUILT_BIN" -eq 0 ] && [ "$HAS_LOCAL_BUILT_BIN" -eq 0 ]; then
-  echo "Error: No arw binary found for platform '$PLATFORM'." >&2
+  echo "Error: No awt binary found for platform '$PLATFORM'." >&2
   echo "If installing from source, compile the CLI binary first:" >&2
-  echo "  go build -o ./bin/$BIN_NAME ./cmd/arw" >&2
+  echo "  go build -o ./bin/$BIN_NAME ./cmd/awt" >&2
   echo "Or install using a pre-packaged release package containing bin/." >&2
   exit 1
 fi
@@ -98,12 +98,12 @@ get_target_paths() {
   repo_dir=$3
 
   if [ "$scope" = "global" ]; then
-    anti_official="$HOME/.gemini/config/skills/agent-review-workflow"
-    anti_legacy="$HOME/.gemini/antigravity/skills/agent-review-workflow"
-    codex_home="${CODEX_HOME:-"$HOME/.codex"}/skills/agent-review-workflow"
-    claude_home="$HOME/.claude/skills/agent-review-workflow"
-    opencode_home="${XDG_CONFIG_HOME:-"$HOME/.config"}/opencode/skills/agent-review-workflow"
-    generic_home="$HOME/.agents/skills/agent-review-workflow"
+    anti_official="$HOME/.gemini/config/skills/agent-worktree"
+    anti_legacy="$HOME/.gemini/antigravity/skills/agent-worktree"
+    codex_home="${CODEX_HOME:-"$HOME/.codex"}/skills/agent-worktree"
+    claude_home="$HOME/.claude/skills/agent-worktree"
+    opencode_home="${XDG_CONFIG_HOME:-"$HOME/.config"}/opencode/skills/agent-worktree"
+    generic_home="$HOME/.agents/skills/agent-worktree"
 
     case "$host" in
       antigravity)
@@ -129,11 +129,11 @@ get_target_paths() {
     esac
   else
     resolved_repo="$(cd -- "$repo_dir" && pwd)"
-    anti_repo="$resolved_repo/.agents/skills/agent-review-workflow"
-    claude_repo="$resolved_repo/.claude/skills/agent-review-workflow"
-    codex_repo="$resolved_repo/.codex/skills/agent-review-workflow"
-    opencode_repo="$resolved_repo/.opencode/skills/agent-review-workflow"
-    generic_repo="$resolved_repo/.agents/skills/agent-review-workflow"
+    anti_repo="$resolved_repo/.agents/skills/agent-worktree"
+    claude_repo="$resolved_repo/.claude/skills/agent-worktree"
+    codex_repo="$resolved_repo/.codex/skills/agent-worktree"
+    opencode_repo="$resolved_repo/.opencode/skills/agent-worktree"
+    generic_repo="$resolved_repo/.agents/skills/agent-worktree"
 
     case "$host" in
       antigravity) echo "$anti_repo" ;;
@@ -155,7 +155,7 @@ get_target_paths() {
   fi
 }
 
-echo "Installing ARW Skill (Scope: $SCOPE, Host: $HOST_TARGET)..."
+echo "Installing AWT Skill (Scope: $SCOPE, Host: $HOST_TARGET)..."
 
 TARGETS="$(get_target_paths "$SCOPE" "$HOST_TARGET" "$TARGET_REPO")"
 
@@ -203,4 +203,4 @@ echo "$TARGETS" | while IFS= read -r target; do
   echo "Installed skill to: $target"
 done
 
-echo "ARW Skill installation complete."
+echo "AWT Skill installation complete."

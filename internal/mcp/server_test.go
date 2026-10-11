@@ -3,7 +3,7 @@ package mcp
 import "testing"
 
 func TestDefinitionsExposeOnlyConstrainedTools(t *testing.T) {
-	forbidden := map[string]bool{"shell": true, "run_arw": true, "git_push": true, "git_merge": true, "git_rebase": true, "git_reset": true, "delete_worktree": true, "workflow_context": true, "workflow_open_review": true, "workflow_mark_merged": true, "workflow_refresh": true}
+	forbidden := map[string]bool{"shell": true, "run_awt": true, "git_push": true, "git_merge": true, "git_rebase": true, "git_reset": true, "delete_worktree": true, "workflow_context": true, "workflow_open_review": true, "workflow_mark_merged": true, "workflow_refresh": true}
 	seen := map[string]bool{}
 	for _, definition := range definitions() {
 		name, ok := definition["name"].(string)

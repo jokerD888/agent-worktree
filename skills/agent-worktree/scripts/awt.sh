@@ -20,7 +20,7 @@ case "$UNAME_S" in
     EXT=".exe"
     ;;
   *)
-    echo "arw: unsupported operating system: $UNAME_S" >&2
+    echo "awt: unsupported operating system: $UNAME_S" >&2
     exit 1
     ;;
 esac
@@ -35,18 +35,18 @@ case "$UNAME_M" in
     ARCH="arm64"
     ;;
   *)
-    echo "arw: unsupported architecture: $UNAME_M" >&2
+    echo "awt: unsupported architecture: $UNAME_M" >&2
     exit 1
     ;;
 esac
 
 PLATFORM="${OS}-${ARCH}"
-BIN_NAME="arw${EXT}"
+BIN_NAME="awt${EXT}"
 TARGET="${SKILL_ROOT}/bin/${PLATFORM}/${BIN_NAME}"
 
 # 4. Check binary existence
 if [ ! -f "$TARGET" ]; then
-  echo "arw binary for platform '$PLATFORM' not found at: $TARGET" >&2
+  echo "awt binary for platform '$PLATFORM' not found at: $TARGET" >&2
   exit 127
 fi
 

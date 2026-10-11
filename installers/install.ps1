@@ -5,10 +5,10 @@ param(
     [switch]$Force
 )
 
-Write-Warning "[DEPRECATED] install.ps1 is the legacy monolithic installer. ARW v2 now natively distributes via Agent Skills (Core + CLI + Wrapper Skill). Use installers/install-skill.ps1 instead."
+Write-Warning "[DEPRECATED] install.ps1 is the legacy monolithic installer. AWT v2 now natively distributes via Agent Skills (Core + CLI + Wrapper Skill). Use installers/install-skill.ps1 instead."
 $ErrorActionPreference = 'Stop'
-$Repository = 'jokerD888/agent-review-workflow'
-$RuntimeRoot = Join-Path $env:LOCALAPPDATA 'AgentReviewWorkflow'
+$Repository = 'jokerD888/agent-worktree'
+$RuntimeRoot = Join-Path $env:LOCALAPPDATA 'AgentWorktree'
 $BinDirectory = Join-Path $RuntimeRoot 'bin'
 
 function Resolve-ReleaseTag {
@@ -16,7 +16,7 @@ function Resolve-ReleaseTag {
     $response = Invoke-WebRequest -UseBasicParsing -MaximumRedirection 5 -Uri "https://github.com/$Repository/releases/latest"
     if ($response.BaseResponse.RequestMessage.RequestUri.AbsolutePath -match '/releases/tag/([^/]+)$') { return $matches[1] }
     $tagMatch = [regex]::Match($response.Content, '/releases/tag/(v[^"?#< /]+)')
-    if (-not $tagMatch.Success) { throw 'Could not resolve the latest ARW release tag.' }
+    if (-not $tagMatch.Success) { throw 'Could not resolve the latest AWT release tag.' }
     return $tagMatch.Groups[1].Value
 }
 
@@ -27,7 +27,7 @@ function Download-Checked([string]$ReleaseBase, [string]$Name, [string]$Destinat
 }
 
 function Set-ManagedRules([string]$Path, [string]$RulesPath) {
-    $begin = '<!-- agent-review-workflow:begin -->'; $end = '<!-- agent-review-workflow:end -->'
+    $begin = '<!-- agent-worktree:begin -->'; $end = '<!-- agent-worktree:end -->'
     $directory = Split-Path -Parent $Path
     New-Item -ItemType Directory -Path $directory -Force | Out-Null
     $rules = (Get-Content -Raw -LiteralPath $RulesPath).Trim()
@@ -38,7 +38,7 @@ function Set-ManagedRules([string]$Path, [string]$RulesPath) {
     $ends = [regex]::Matches($existing, [regex]::Escape($end)).Count
     $blocks = [regex]::Matches($existing, $pattern).Count
     if ($starts -ne $ends -or $blocks -ne $starts) {
-        throw "Refusing to update malformed agent-review-workflow markers in $Path. Repair the marker block first."
+        throw "Refusing to update malformed agent-worktree markers in $Path. Repair the marker block first."
     }
     $updated = if ([regex]::IsMatch($existing, $pattern)) { [regex]::Replace($existing, $pattern, $block) } elseif ([string]::IsNullOrWhiteSpace($existing)) { "$block`r`n" } else { "$($existing.TrimEnd())`r`n`r`n$block`r`n" }
     Set-Content -LiteralPath $Path -Value $updated -Encoding utf8
@@ -49,7 +49,7 @@ function ConvertTo-TomlBasicString([string]$Value) {
 }
 
 function Set-AgentMcpConfig([string]$RulesPath) {
-    $mcpPath = Join-Path $BinDirectory 'arw-mcp.exe'
+    $mcpPath = Join-Path $BinDirectory 'awt-mcp.exe'
     $userHome = $env:USERPROFILE
     $codexHome = if ($env:CODEX_HOME) { $env:CODEX_HOME } else { Join-Path $userHome '.codex' }
     $codexConfig = Join-Path $codexHome 'config.toml'
@@ -57,13 +57,13 @@ function Set-AgentMcpConfig([string]$RulesPath) {
     Set-ManagedRules (Join-Path $userHome '.claude\CLAUDE.md') $RulesPath
     Set-ManagedRules (Join-Path $userHome '.config\opencode\AGENTS.md') $RulesPath
     New-Item -ItemType Directory -Path (Split-Path -Parent $codexConfig) -Force | Out-Null
-    $begin = '# agent-review-workflow:mcp:begin'; $end = '# agent-review-workflow:mcp:end'
-    $block = "$begin`r`n[mcp_servers.arw]`r`ncommand = $(ConvertTo-TomlBasicString $mcpPath)`r`nstartup_timeout_sec = 30`r`n$end"
+    $begin = '# agent-worktree:mcp:begin'; $end = '# agent-worktree:mcp:end'
+    $block = "$begin`r`n[mcp_servers.awt]`r`ncommand = $(ConvertTo-TomlBasicString $mcpPath)`r`nstartup_timeout_sec = 30`r`n$end"
     $existing = if (Test-Path -LiteralPath $codexConfig) { Get-Content -Raw -LiteralPath $codexConfig } else { '' }
     $pattern = '(?s)' + [regex]::Escape($begin) + '.*?' + [regex]::Escape($end)
     $updated = if ([regex]::IsMatch($existing, $pattern)) { [regex]::Replace($existing, $pattern, $block) } else { "$($existing.TrimEnd())`r`n`r`n$block`r`n" }
     Set-Content -LiteralPath $codexConfig -Value $updated -Encoding utf8
-    if (Get-Command claude -ErrorAction SilentlyContinue) { & claude mcp add --scope user arw -- $mcpPath | Out-Host }
+    if (Get-Command claude -ErrorAction SilentlyContinue) { & claude mcp add --scope user awt -- $mcpPath | Out-Host }
     if (Get-Command opencode -ErrorAction SilentlyContinue) {
         $configPath = Join-Path $userHome '.config\opencode\opencode.json'
         $config = if (Test-Path -LiteralPath $configPath) { Get-Content -Raw -LiteralPath $configPath | ConvertFrom-Json -AsHashtable } else { @{} }
@@ -77,18 +77,18 @@ function Set-AgentMcpConfig([string]$RulesPath) {
         if ($majorVersion -ge 2) {
             if (-not $config.mcp.ContainsKey('servers')) { $config.mcp.servers = @{} }
             $server.timeout = @{ startup = 30000 }
-            $config.mcp.servers.arw = $server
+            $config.mcp.servers.awt = $server
         } else {
             if ($config.mcp.ContainsKey('servers')) {
                 $servers = $config.mcp.servers
-                if ($servers -isnot [System.Collections.IDictionary] -or @($servers.Keys | Where-Object { $_ -ne 'arw' }).Count -ne 0) {
+                if ($servers -isnot [System.Collections.IDictionary] -or @($servers.Keys | Where-Object { $_ -ne 'awt' }).Count -ne 0) {
                     throw 'Refusing to remove unrelated mcp.servers entries for legacy OpenCode configuration; migrate them manually.'
                 }
                 $config.mcp.Remove('servers')
             }
             $server.enabled = $true
             $server.timeout = 30000
-            $config.mcp.arw = $server
+            $config.mcp.awt = $server
         }
         New-Item -ItemType Directory -Path (Split-Path -Parent $configPath) -Force | Out-Null
         $config | ConvertTo-Json -Depth 12 | Set-Content -LiteralPath $configPath -Encoding utf8
@@ -97,24 +97,24 @@ function Set-AgentMcpConfig([string]$RulesPath) {
 
 $tag = Resolve-ReleaseTag
 $releaseBase = "https://github.com/$Repository/releases/download/$tag"
-$temporary = New-Item -ItemType Directory -Path (Join-Path ([IO.Path]::GetTempPath()) ('arw-install-' + [guid]::NewGuid()))
+$temporary = New-Item -ItemType Directory -Path (Join-Path ([IO.Path]::GetTempPath()) ('awt-install-' + [guid]::NewGuid()))
 try {
     $checksumsPath = Join-Path $temporary 'checksums.txt'
     Invoke-WebRequest -UseBasicParsing -Uri "$releaseBase/checksums.txt" -OutFile $checksumsPath
     $checksums = @{}
     Get-Content -LiteralPath $checksumsPath | ForEach-Object { if ($_ -match '^([a-fA-F0-9]{64})\s+\*?(.+)$') { $checksums[$matches[2]] = $matches[1].ToLowerInvariant() } }
-    $rulesPath = Join-Path $temporary 'arw-global-rules.md'
-    Download-Checked $releaseBase 'arw-global-rules.md' $rulesPath $checksums
+    $rulesPath = Join-Path $temporary 'awt-global-rules.md'
+    Download-Checked $releaseBase 'awt-global-rules.md' $rulesPath $checksums
     New-Item -ItemType Directory -Path $BinDirectory -Force | Out-Null
-    foreach ($name in 'arw_windows_amd64.exe', 'arw-mcp_windows_amd64.exe') {
+    foreach ($name in 'awt_windows_amd64.exe', 'awt-mcp_windows_amd64.exe') {
         $target = Join-Path $BinDirectory $name
         if ((Test-Path -LiteralPath $target) -and -not $Force) { throw "$target already exists; pass -Force to replace it." }
         Download-Checked $releaseBase $name $target $checksums
     }
-    Copy-Item -LiteralPath (Join-Path $BinDirectory 'arw_windows_amd64.exe') -Destination (Join-Path $BinDirectory 'arw.exe') -Force
-    Copy-Item -LiteralPath (Join-Path $BinDirectory 'arw-mcp_windows_amd64.exe') -Destination (Join-Path $BinDirectory 'arw-mcp.exe') -Force
+    Copy-Item -LiteralPath (Join-Path $BinDirectory 'awt_windows_amd64.exe') -Destination (Join-Path $BinDirectory 'awt.exe') -Force
+    Copy-Item -LiteralPath (Join-Path $BinDirectory 'awt-mcp_windows_amd64.exe') -Destination (Join-Path $BinDirectory 'awt-mcp.exe') -Force
     $userPath = [Environment]::GetEnvironmentVariable('Path', 'User')
     if (($userPath -split ';') -notcontains $BinDirectory) { [Environment]::SetEnvironmentVariable('Path', "$userPath;$BinDirectory", 'User'); Write-Host "Added $BinDirectory to user PATH; open a new terminal." }
     if ($ConfigureAgents) { Set-AgentMcpConfig $rulesPath }
-    Write-Host "Installed ARW $tag in $RuntimeRoot. Run 'arw doctor' from a repository."
+    Write-Host "Installed AWT $tag in $RuntimeRoot. Run 'awt doctor' from a repository."
 } finally { Remove-Item -LiteralPath $temporary -Recurse -Force -ErrorAction SilentlyContinue }

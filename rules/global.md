@@ -1,8 +1,8 @@
 # Personal AI development workflow
 
 > [!NOTE]
-> **[DEPRECATED for ARW workflow]** This monolithic rule file is preserved for legacy installer compatibility.
-> Modern ARW distributes via the native Agent Skill in `skills/agent-review-workflow/` without global instruction file pollution.
+> **[DEPRECATED for AWT workflow]** This monolithic rule file is preserved for legacy installer compatibility.
+> Modern AWT distributes via the native Agent Skill in `skills/agent-worktree/` without global instruction file pollution.
 
 ## Git safety
 
@@ -50,30 +50,30 @@
   The agent may carry out an approved local action only after that intent is
   explicit; decision authority does not require the user to operate the CLI.
 
-## ARW v2 task workflow
+## AWT v2 task workflow
 
-- ARW is opt-in by intent, not mandatory for every repository or conversation.
-  Do not create an ARW task merely because a Git repository is open or the user
+- AWT is opt-in by intent, not mandatory for every repository or conversation.
+  Do not create an AWT task merely because a Git repository is open or the user
   named a subject.
 - Treat questions, explanation, investigation, throwaway experiments, and
-  clearly disposable one-off tools as non-ARW work by default.
+  clearly disposable one-off tools as non-AWT work by default.
 - Treat a clear delivery/review intent (for example “开始修复…”, “新增功能…”,
-  “这个要审查”) as an ARW task intent. When the scope is genuinely unclear,
+  “这个要审查”) as an AWT task intent. When the scope is genuinely unclear,
   ask one short question before creating a task: “这是临时处理，还是要作为可审查
-  任务纳入 ARW？” Do not repeatedly ask after the user has answered.
-- “这次不用 ARW”, “不建任务”, “临时处理”, or equivalent wording disables ARW
-  for the current conversation until the user explicitly asks to use/start ARW.
-  This only skips ARW bookkeeping; all Git safety rules still apply.
-- When `arw` and its typed `arw-mcp` tools are available and the user has chosen
-  ARW for a named task, read `workflow_get_task` before starting AI work. Use
+  任务纳入 AWT？” Do not repeatedly ask after the user has answered.
+- “这次不用 AWT”, “不建任务”, “临时处理”, or equivalent wording disables AWT
+  for the current conversation until the user explicitly asks to use/start AWT.
+  This only skips AWT bookkeeping; all Git safety rules still apply.
+- When `awt` and its typed `awt-mcp` tools are available and the user has chosen
+  AWT for a named task, read `workflow_get_task` before starting AI work. Use
   `workflow_list_tasks` only when the task is not yet known.
-- Creating a task adds a branch (`arw/<id>`) and a worktree and fixes the task
+- Creating a task adds a branch (`awt/<id>`) and a worktree and fixes the task
   id the user will reference in later instructions. Before calling
   `workflow_start_task`, briefly propose the intended task id, branch, and
   worktree path and let the user confirm or rename; do not create a task
   silently. Map a clear user intent such as “开始修复登录跳转” to
   `workflow_start_task` only after that confirmation; map review requests to
-  `workflow_prepare_review`. Never pass arbitrary shell text to ARW.
+  `workflow_prepare_review`. Never pass arbitrary shell text to AWT.
 - For “在 VS Code 中审查 …”, prepare the review first, then return its worktree
   path and exact base/head range. Do not change the current VS Code window's
   branch or worktree; the user chooses the editor or Git UI.

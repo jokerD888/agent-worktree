@@ -8,11 +8,11 @@ import (
 	"time"
 	"unicode"
 
-	gitclient "github.com/jokerD888/agent-review-workflow/internal/git"
-	"github.com/jokerD888/agent-review-workflow/internal/ledger"
-	"github.com/jokerD888/agent-review-workflow/internal/review"
-	"github.com/jokerD888/agent-review-workflow/internal/task"
-	"github.com/jokerD888/agent-review-workflow/internal/worktree"
+	gitclient "github.com/jokerD888/agent-worktree/internal/git"
+	"github.com/jokerD888/agent-worktree/internal/ledger"
+	"github.com/jokerD888/agent-worktree/internal/review"
+	"github.com/jokerD888/agent-worktree/internal/task"
+	"github.com/jokerD888/agent-worktree/internal/worktree"
 )
 
 type Service struct {
@@ -104,7 +104,7 @@ func (s Service) Start(options StartOptions) (StartResult, error) {
 			return StartResult{}, err
 		}
 	}
-	branch := "arw/" + id
+	branch := "awt/" + id
 	path := options.WorktreePath
 	if path == "" {
 		path = worktree.DefaultPath(s.Git.Root, id)
@@ -120,7 +120,7 @@ func (s Service) Start(options StartOptions) (StartResult, error) {
 	}
 	now := time.Now().Format(time.RFC3339)
 	entry := task.Task{SchemaVersion: task.SchemaVersion, ID: id, Title: options.Title, Branch: branch, Base: task.Base{Ref: baseRef, SHA: baseSHA}, ParentTask: parent, Lifecycle: task.Active, Review: task.Review{Status: task.ReviewNone}, CreatedAt: now, UpdatedAt: now}
-	if err := s.Ledger.Save(entry, "chore(arw): create task "+id); err != nil {
+	if err := s.Ledger.Save(entry, "chore(awt): create task "+id); err != nil {
 		return StartResult{}, fmt.Errorf("task worktree was created, but saving its registry record failed: %w", err)
 	}
 	return StartResult{Task: entry, Worktree: path}, nil
@@ -139,7 +139,7 @@ func (s Service) Park(id string) (task.Task, error) {
 	}
 	entry.Lifecycle = task.Parked
 	task.Touch(&entry)
-	if err := s.Ledger.Save(entry, "chore(arw): park task "+id); err != nil {
+	if err := s.Ledger.Save(entry, "chore(awt): park task "+id); err != nil {
 		return task.Task{}, err
 	}
 	return entry, nil
@@ -154,7 +154,7 @@ func (s Service) Resume(id string) (task.Task, error) {
 	}
 	entry.Lifecycle = task.Active
 	task.Touch(&entry)
-	if err := s.Ledger.Save(entry, "chore(arw): resume task "+id); err != nil {
+	if err := s.Ledger.Save(entry, "chore(awt): resume task "+id); err != nil {
 		return task.Task{}, err
 	}
 	return entry, nil
@@ -170,7 +170,7 @@ func (s Service) MarkReady(id string) (task.Task, error) {
 	}
 	entry.Lifecycle = task.ReadyForReview
 	task.Touch(&entry)
-	if err := s.Ledger.Save(entry, "chore(arw): mark task ready "+id); err != nil {
+	if err := s.Ledger.Save(entry, "chore(awt): mark task ready "+id); err != nil {
 		return task.Task{}, err
 	}
 	return entry, nil
@@ -236,7 +236,7 @@ func (s Service) Merge(id string) (MergeResult, error) {
 	}
 	entry.Lifecycle = task.Merged
 	task.Touch(&entry)
-	if err := s.Ledger.Save(entry, "chore(arw): merge task "+id+" into "+targetBranch); err != nil {
+	if err := s.Ledger.Save(entry, "chore(awt): merge task "+id+" into "+targetBranch); err != nil {
 		return MergeResult{}, fmt.Errorf("task was merged into %q, but updating the registry failed: %w", targetBranch, err)
 	}
 	return MergeResult{Task: entry, SourceBranch: entry.Branch, TargetBranch: targetBranch, HeadSHA: mergedHead}, nil
@@ -273,7 +273,7 @@ func (s Service) Abandon(id string) (task.Task, error) {
 	}
 	entry.Lifecycle = task.Abandoned
 	task.Touch(&entry)
-	if err := s.Ledger.Save(entry, "chore(arw): abandon task "+id); err != nil {
+	if err := s.Ledger.Save(entry, "chore(awt): abandon task "+id); err != nil {
 		return task.Task{}, err
 	}
 	return entry, nil
@@ -374,7 +374,7 @@ func (s Service) Approve(id, expectedBaseSHA, expectedHeadSHA string) (task.Task
 	}
 	entry.Review = task.Review{Status: task.ReviewApproved, ReviewedBaseSHA: snapshot.Base.SHA, ReviewedHeadSHA: snapshot.Head.SHA}
 	task.Touch(&entry)
-	if err := s.Ledger.Save(entry, "chore(arw): approve task "+id); err != nil {
+	if err := s.Ledger.Save(entry, "chore(awt): approve task "+id); err != nil {
 		return task.Task{}, review.Snapshot{}, err
 	}
 	return entry, snapshot, nil
@@ -391,7 +391,7 @@ func (s Service) RequestChanges(id, reason string) (task.Task, error) {
 	entry.Lifecycle = task.Active
 	entry.Review = task.Review{Status: task.ReviewChangesRequested}
 	task.Touch(&entry)
-	if err := s.Ledger.Save(entry, "chore(arw): request changes for "+id+reasonSuffix(reason)); err != nil {
+	if err := s.Ledger.Save(entry, "chore(awt): request changes for "+id+reasonSuffix(reason)); err != nil {
 		return task.Task{}, err
 	}
 	return entry, nil

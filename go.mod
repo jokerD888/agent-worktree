@@ -1,4 +1,4 @@
-module github.com/jokerD888/agent-review-workflow
+module github.com/jokerD888/agent-worktree
 
 go 1.26.0
 

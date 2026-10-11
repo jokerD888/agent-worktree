@@ -1,12 +1,12 @@
-# ARW for Codex
+# AWT for Codex
 
-Do not use ARW for questions, disposable experiments, or a user statement such
-as "这次不用 ARW". That statement applies for the current conversation until the
-user explicitly re-enables ARW. When delivery scope is unclear, ask once whether
-the work is temporary or should be a reviewable ARW task.
+Do not use AWT for questions, disposable experiments, or a user statement such
+as "这次不用 AWT". That statement applies for the current conversation until the
+user explicitly re-enables AWT. When delivery scope is unclear, ask once whether
+the work is temporary or should be a reviewable AWT task.
 
-When the user expresses a clear ARW task intent such as "开始修复登录跳转",
-briefly propose the intended task id, branch (`arw/<id>`), and worktree path,
+When the user expresses a clear AWT task intent such as "开始修复登录跳转",
+briefly propose the intended task id, branch (`awt/<id>`), and worktree path,
 let the user confirm or rename, then call `workflow_start_task`. Do not create
 a task silently. Use `workflow_list_tasks` to discover tasks and
 `workflow_get_task` for a known task. For review intents, use

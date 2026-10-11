@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	gitclient "github.com/jokerD888/agent-review-workflow/internal/git"
+	gitclient "github.com/jokerD888/agent-worktree/internal/git"
 )
 
 func DefaultPath(repoRoot, taskID string) string {

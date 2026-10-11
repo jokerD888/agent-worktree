@@ -28,18 +28,18 @@ function Get-SkillSourceDir {
     }
 
     # 3. Check dist directory (release package in repo)
-    $distDir = Join-Path $parent 'dist\agent-review-workflow'
+    $distDir = Join-Path $parent 'dist\agent-worktree'
     if (Test-Path -LiteralPath (Join-Path $distDir 'SKILL.md')) {
         return $distDir
     }
 
-    # 4. Check source tree skills/agent-review-workflow
-    $sourceDir = Join-Path $parent 'skills\agent-review-workflow'
+    # 4. Check source tree skills/agent-worktree
+    $sourceDir = Join-Path $parent 'skills\agent-worktree'
     if (Test-Path -LiteralPath (Join-Path $sourceDir 'SKILL.md')) {
         return $sourceDir
     }
 
-    throw "Could not locate agent-review-workflow skill source files."
+    throw "Could not locate agent-worktree skill source files."
 }
 
 function Get-TargetPaths([string]$ScopeMode, [string]$HostName, [string]$RepoPath) {
@@ -47,12 +47,12 @@ function Get-TargetPaths([string]$ScopeMode, [string]$HostName, [string]$RepoPat
     $targets = [System.Collections.Generic.List[string]]::new()
 
     if ($ScopeMode -eq 'global') {
-        $antiOfficial = Join-Path $userHome '.gemini\config\skills\agent-review-workflow'
-        $antiFallback = Join-Path $userHome '.gemini\antigravity\skills\agent-review-workflow'
-        $codexHome = if ($env:CODEX_HOME) { Join-Path $env:CODEX_HOME 'skills\agent-review-workflow' } else { Join-Path $userHome '.codex\skills\agent-review-workflow' }
-        $claudeHome = Join-Path $userHome '.claude\skills\agent-review-workflow'
-        $openCodeHome = if ($env:XDG_CONFIG_HOME) { Join-Path $env:XDG_CONFIG_HOME 'opencode\skills\agent-review-workflow' } else { Join-Path $userHome '.config\opencode\skills\agent-review-workflow' }
-        $genericHome = Join-Path $userHome '.agents\skills\agent-review-workflow'
+        $antiOfficial = Join-Path $userHome '.gemini\config\skills\agent-worktree'
+        $antiFallback = Join-Path $userHome '.gemini\antigravity\skills\agent-worktree'
+        $codexHome = if ($env:CODEX_HOME) { Join-Path $env:CODEX_HOME 'skills\agent-worktree' } else { Join-Path $userHome '.codex\skills\agent-worktree' }
+        $claudeHome = Join-Path $userHome '.claude\skills\agent-worktree'
+        $openCodeHome = if ($env:XDG_CONFIG_HOME) { Join-Path $env:XDG_CONFIG_HOME 'opencode\skills\agent-worktree' } else { Join-Path $userHome '.config\opencode\skills\agent-worktree' }
+        $genericHome = Join-Path $userHome '.agents\skills\agent-worktree'
 
         switch ($HostName) {
             'antigravity' {
@@ -74,11 +74,11 @@ function Get-TargetPaths([string]$ScopeMode, [string]$HostName, [string]$RepoPat
         }
     } else {
         $resolvedRepo = (Resolve-Path -LiteralPath $RepoPath).Path
-        $antiRepo = Join-Path $resolvedRepo '.agents\skills\agent-review-workflow'
-        $claudeRepo = Join-Path $resolvedRepo '.claude\skills\agent-review-workflow'
-        $codexRepo = Join-Path $resolvedRepo '.codex\skills\agent-review-workflow'
-        $openCodeRepo = Join-Path $resolvedRepo '.opencode\skills\agent-review-workflow'
-        $genericRepo = Join-Path $resolvedRepo '.agents\skills\agent-review-workflow'
+        $antiRepo = Join-Path $resolvedRepo '.agents\skills\agent-worktree'
+        $claudeRepo = Join-Path $resolvedRepo '.claude\skills\agent-worktree'
+        $codexRepo = Join-Path $resolvedRepo '.codex\skills\agent-worktree'
+        $openCodeRepo = Join-Path $resolvedRepo '.opencode\skills\agent-worktree'
+        $genericRepo = Join-Path $resolvedRepo '.agents\skills\agent-worktree'
 
         switch ($HostName) {
             'antigravity' { $targets.Add($antiRepo) }
@@ -112,7 +112,7 @@ $targetArch = switch ($rawArch) {
 }
 $currentPlatform = "$targetOs-$targetArch"
 $binExt = if ($isWin) { '.exe' } else { '' }
-$binName = "arw$binExt"
+$binName = "awt$binExt"
 
 $srcBin = Join-Path $sourceSkill 'bin'
 $hasPrebuiltBin = (Test-Path -LiteralPath (Join-Path $srcBin $currentPlatform)) -or
@@ -121,12 +121,12 @@ $localBuiltBin = Join-Path $repoRoot "bin\$binName"
 $hasLocalBuiltBin = Test-Path -LiteralPath $localBuiltBin
 
 if (-not $hasPrebuiltBin -and -not $hasLocalBuiltBin) {
-    throw "No arw binary found for platform '$currentPlatform'.`nIf installing from source, compile the CLI binary first:`n  go build -o ./bin/$binName ./cmd/arw`nOr install using a pre-packaged release package containing bin/."
+    throw "No awt binary found for platform '$currentPlatform'.`nIf installing from source, compile the CLI binary first:`n  go build -o ./bin/$binName ./cmd/awt`nOr install using a pre-packaged release package containing bin/."
 }
 
 $targets = Get-TargetPaths -ScopeMode $Scope -HostName $HostTarget -RepoPath $TargetRepo
 
-Write-Host "Installing ARW Skill (Scope: $Scope, Host: $HostTarget)..."
+Write-Host "Installing AWT Skill (Scope: $Scope, Host: $HostTarget)..."
 
 foreach ($target in $targets) {
     if (Test-Path -LiteralPath $target) {
@@ -172,4 +172,4 @@ foreach ($target in $targets) {
     Write-Host "Installed skill to: $target"
 }
 
-Write-Host "ARW Skill installation complete."
+Write-Host "AWT Skill installation complete."

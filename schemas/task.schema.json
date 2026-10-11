@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/jokerD888/agent-review-workflow/schemas/task.schema.json",
-  "title": "ARW Task",
+  "$id": "https://github.com/jokerD888/agent-worktree/schemas/task.schema.json",
+  "title": "AWT Task",
   "type": "object",
   "additionalProperties": false,
   "required": ["schema_version", "id", "title", "branch", "base", "lifecycle", "review", "created_at", "updated_at"],
@@ -9,7 +9,7 @@
     "schema_version": { "const": 1 },
     "id": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$" },
     "title": { "type": "string", "minLength": 1 },
-    "branch": { "type": "string", "pattern": "^arw/[a-z0-9]+(?:-[a-z0-9]+)*$" },
+    "branch": { "type": "string", "pattern": "^awt/[a-z0-9]+(?:-[a-z0-9]+)*$" },
     "base": {
       "type": "object",
       "additionalProperties": false,

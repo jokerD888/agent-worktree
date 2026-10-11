@@ -8,8 +8,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/jokerD888/agent-review-workflow/internal/app"
-	"github.com/jokerD888/agent-review-workflow/internal/task"
+	"github.com/jokerD888/agent-worktree/internal/app"
+	"github.com/jokerD888/agent-worktree/internal/task"
 )
 
 const ProtocolVersion = "2025-03-26"
@@ -82,7 +82,7 @@ func (s Server) handle(req request) (any, error) {
 		if version == "" {
 			version = "0.2.0-dev"
 		}
-		return map[string]any{"protocolVersion": ProtocolVersion, "capabilities": map[string]any{"tools": map[string]any{}}, "serverInfo": map[string]string{"name": "arw-mcp", "version": version}, "instructions": "Use only the ARW task tools. High-risk Git operations are intentionally unavailable."}, nil
+		return map[string]any{"protocolVersion": ProtocolVersion, "capabilities": map[string]any{"tools": map[string]any{}}, "serverInfo": map[string]string{"name": "awt-mcp", "version": version}, "instructions": "Use only the AWT task tools. High-risk Git operations are intentionally unavailable."}, nil
 	case "ping":
 		return map[string]any{}, nil
 	case "tools/list":
@@ -270,7 +270,7 @@ func definitions() []map[string]any {
 		return properties
 	}
 	return []map[string]any{
-		{"name": "workflow_list_tasks", "description": "List tasks tracked by ARW. This is read-only.", "inputSchema": map[string]any{"type": "object", "properties": map[string]any{"filter": map[string]any{"type": "string", "enum": []string{"active", "reviewable", "parked", "blocked"}}, "cwd": cwd["cwd"]}}},
+		{"name": "workflow_list_tasks", "description": "List tasks tracked by AWT. This is read-only.", "inputSchema": map[string]any{"type": "object", "properties": map[string]any{"filter": map[string]any{"type": "string", "enum": []string{"active", "reviewable", "parked", "blocked"}}, "cwd": cwd["cwd"]}}},
 		{"name": "workflow_get_task", "description": "Read one task and its local worktree path. This is read-only.", "inputSchema": map[string]any{"type": "object", "required": []string{"task_id"}, "properties": withTask(nil)}},
 		{"name": "workflow_start_task", "description": "Create a task branch, task worktree, and ledger record. Does not touch protected branches or remotes.", "inputSchema": map[string]any{"type": "object", "required": []string{"title"}, "properties": map[string]any{"title": map[string]any{"type": "string"}, "id": map[string]any{"type": "string"}, "parent_task": map[string]any{"type": "string"}, "cwd": cwd["cwd"]}}},
 		{"name": "workflow_prepare_review", "description": "Create a review snapshot using the task's recorded base or parent task. Read-only with respect to source code.", "inputSchema": map[string]any{"type": "object", "required": []string{"task_id"}, "properties": withTask(nil)}},

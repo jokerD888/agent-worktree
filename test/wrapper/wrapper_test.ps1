@@ -4,16 +4,16 @@ param()
 $ErrorActionPreference = 'Stop'
 $testDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $repoRoot = Split-Path -Parent (Split-Path -Parent $testDir)
-$wrapperPs1 = Join-Path $repoRoot 'skills\agent-review-workflow\scripts\arw.ps1'
+$wrapperPs1 = Join-Path $repoRoot 'skills\agent-worktree\scripts\awt.ps1'
 
 Write-Host "Running wrapper tests..."
 
 # Test 1: Missing binary fails with exit code 127
-$tempSkill = Join-Path ([System.IO.Path]::GetTempPath()) ("arw-test-skill-" + [guid]::NewGuid())
+$tempSkill = Join-Path ([System.IO.Path]::GetTempPath()) ("awt-test-skill-" + [guid]::NewGuid())
 New-Item -ItemType Directory -Path (Join-Path $tempSkill 'scripts') -Force | Out-Null
-Copy-Item -LiteralPath $wrapperPs1 -Destination (Join-Path $tempSkill 'scripts\arw.ps1')
+Copy-Item -LiteralPath $wrapperPs1 -Destination (Join-Path $tempSkill 'scripts\awt.ps1')
 
-$proc = Start-Process -FilePath "pwsh" -ArgumentList "-NoProfile", "-File", (Join-Path $tempSkill 'scripts\arw.ps1'), "version" -PassThru -NoNewWindow -Wait -RedirectStandardError (Join-Path $tempSkill 'err.txt')
+$proc = Start-Process -FilePath "pwsh" -ArgumentList "-NoProfile", "-File", (Join-Path $tempSkill 'scripts\awt.ps1'), "version" -PassThru -NoNewWindow -Wait -RedirectStandardError (Join-Path $tempSkill 'err.txt')
 if ($proc.ExitCode -ne 127) {
     throw "Test 1 failed: Expected exit code 127 for missing binary, got $($proc.ExitCode)"
 }
@@ -27,15 +27,15 @@ Write-Host "PASS: Test 1 - Missing binary returns 127 with clear error"
 $binDir = Join-Path $tempSkill 'bin\windows-amd64'
 New-Item -ItemType Directory -Path $binDir -Force | Out-Null
 
-# We can copy our compiled arw.exe to test end-to-end
-$compiledArw = Join-Path $repoRoot 'bin\arw.exe'
-if (-not (Test-Path -LiteralPath $compiledArw)) {
-    & go build -o $compiledArw (Join-Path $repoRoot 'cmd\arw')
+# We can copy our compiled awt.exe to test end-to-end
+$compiledAwt = Join-Path $repoRoot 'bin\awt.exe'
+if (-not (Test-Path -LiteralPath $compiledAwt)) {
+    & go build -o $compiledAwt (Join-Path $repoRoot 'cmd\awt')
 }
-Copy-Item -LiteralPath $compiledArw -Destination (Join-Path $binDir 'arw.exe')
+Copy-Item -LiteralPath $compiledAwt -Destination (Join-Path $binDir 'awt.exe')
 
 $outTxt = Join-Path $tempSkill 'out.txt'
-$proc2 = Start-Process -FilePath "pwsh" -ArgumentList "-NoProfile", "-File", (Join-Path $tempSkill 'scripts\arw.ps1'), "version", "--json" -PassThru -NoNewWindow -Wait -RedirectStandardOutput $outTxt
+$proc2 = Start-Process -FilePath "pwsh" -ArgumentList "-NoProfile", "-File", (Join-Path $tempSkill 'scripts\awt.ps1'), "version", "--json" -PassThru -NoNewWindow -Wait -RedirectStandardOutput $outTxt
 if ($proc2.ExitCode -ne 0) {
     throw "Test 2 failed: Expected exit code 0, got $($proc2.ExitCode)"
 }
@@ -48,7 +48,7 @@ Write-Host "PASS: Test 2 - Wrapper transparently forwards args, stdout, and exit
 
 # Test 3: Wrapper preserves non-zero exit code from CLI
 $errTxt2 = Join-Path $tempSkill 'err2.txt'
-$proc3 = Start-Process -FilePath "pwsh" -ArgumentList "-NoProfile", "-File", (Join-Path $tempSkill 'scripts\arw.ps1'), "nonexistent-cmd" -PassThru -NoNewWindow -Wait -RedirectStandardError $errTxt2
+$proc3 = Start-Process -FilePath "pwsh" -ArgumentList "-NoProfile", "-File", (Join-Path $tempSkill 'scripts\awt.ps1'), "nonexistent-cmd" -PassThru -NoNewWindow -Wait -RedirectStandardError $errTxt2
 if ($proc3.ExitCode -eq 0) {
     throw "Test 3 failed: Expected non-zero exit code for invalid command, got 0"
 }

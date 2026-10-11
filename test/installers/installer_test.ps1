@@ -8,7 +8,7 @@ $installerPs1 = Join-Path $repoRoot 'installers\install-skill.ps1'
 
 Write-Host "Running installer tests in isolated environment..."
 
-$tempHome = Join-Path ([System.IO.Path]::GetTempPath()) ("arw-inst-test-" + [guid]::NewGuid())
+$tempHome = Join-Path ([System.IO.Path]::GetTempPath()) ("awt-inst-test-" + [guid]::NewGuid())
 $origUserProfile = $env:USERPROFILE
 $origCodexHome = $env:CODEX_HOME
 
@@ -18,8 +18,8 @@ try {
 
     # Test Global Installation for Antigravity (checks official config path)
     & $installerPs1 -Scope global -HostTarget antigravity -Force
-    $antiOfficial = Join-Path $tempHome '.gemini\config\skills\agent-review-workflow\SKILL.md'
-    $antiLegacy = Join-Path $tempHome '.gemini\antigravity\skills\agent-review-workflow\SKILL.md'
+    $antiOfficial = Join-Path $tempHome '.gemini\config\skills\agent-worktree\SKILL.md'
+    $antiLegacy = Join-Path $tempHome '.gemini\antigravity\skills\agent-worktree\SKILL.md'
     if (-not (Test-Path -LiteralPath $antiOfficial)) {
         throw "Official Antigravity skill path was not installed at: $antiOfficial"
     }
@@ -30,7 +30,7 @@ try {
 
     # Test Global Installation for Codex
     & $installerPs1 -Scope global -HostTarget codex -Force
-    $codexSkill = Join-Path $env:CODEX_HOME 'skills\agent-review-workflow\SKILL.md'
+    $codexSkill = Join-Path $env:CODEX_HOME 'skills\agent-worktree\SKILL.md'
     if (-not (Test-Path -LiteralPath $codexSkill)) {
         throw "Global codex skill was not installed at: $codexSkill"
     }
@@ -41,10 +41,10 @@ try {
     New-Item -ItemType Directory -Path $tempRepo -Force | Out-Null
     & $installerPs1 -Scope repo -HostTarget all -TargetRepo $tempRepo -Force
 
-    $agentsSkill = Join-Path $tempRepo '.agents\skills\agent-review-workflow\SKILL.md'
-    $claudeSkill = Join-Path $tempRepo '.claude\skills\agent-review-workflow\SKILL.md'
-    $codexRepoSkill = Join-Path $tempRepo '.codex\skills\agent-review-workflow\SKILL.md'
-    $opencodeSkill = Join-Path $tempRepo '.opencode\skills\agent-review-workflow\SKILL.md'
+    $agentsSkill = Join-Path $tempRepo '.agents\skills\agent-worktree\SKILL.md'
+    $claudeSkill = Join-Path $tempRepo '.claude\skills\agent-worktree\SKILL.md'
+    $codexRepoSkill = Join-Path $tempRepo '.codex\skills\agent-worktree\SKILL.md'
+    $opencodeSkill = Join-Path $tempRepo '.opencode\skills\agent-worktree\SKILL.md'
 
     if (-not (Test-Path -LiteralPath $agentsSkill)) { throw "Repo skill missing at: $agentsSkill" }
     if (-not (Test-Path -LiteralPath $claudeSkill)) { throw "Claude repo skill missing at: $claudeSkill" }
@@ -53,7 +53,7 @@ try {
     Write-Host "PASS: Repo-scoped skills installed across all host directories (.agents, .claude, .codex, .opencode)"
 
     # Test That Wrapper In Installed Skill Can Execute
-    $wrapperInSkill = Join-Path $tempRepo '.agents\skills\agent-review-workflow\scripts\arw.ps1'
+    $wrapperInSkill = Join-Path $tempRepo '.agents\skills\agent-worktree\scripts\awt.ps1'
     if (-not (Test-Path -LiteralPath $wrapperInSkill)) {
         throw "Wrapper script not found in installed repo skill: $wrapperInSkill"
     }

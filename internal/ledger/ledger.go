@@ -7,13 +7,13 @@ import (
 	"sort"
 	"strings"
 
-	gitclient "github.com/jokerD888/agent-review-workflow/internal/git"
-	"github.com/jokerD888/agent-review-workflow/internal/task"
+	gitclient "github.com/jokerD888/agent-worktree/internal/git"
+	"github.com/jokerD888/agent-worktree/internal/task"
 	"gopkg.in/yaml.v3"
 )
 
-const RegistryBranch = "arw/registry"
-const taskDirectory = ".agent-review/tasks"
+const RegistryBranch = "awt/registry"
+const taskDirectory = ".agent-worktree/tasks"
 
 type Store struct{ Git gitclient.Client }
 
@@ -25,7 +25,7 @@ func (s Store) Setup() error {
 	if err != nil {
 		return fmt.Errorf("create empty registry tree: %w", err)
 	}
-	commit, err := s.Git.Run("commit-tree", strings.TrimSpace(tree), "-m", "chore(arw): initialize task registry")
+	commit, err := s.Git.Run("commit-tree", strings.TrimSpace(tree), "-m", "chore(awt): initialize task registry")
 	if err != nil {
 		return fmt.Errorf("initialize registry needs Git user.name and user.email: %w", err)
 	}
@@ -103,7 +103,7 @@ func (s Store) commitFile(path, contents, message string) error {
 	if err != nil {
 		return err
 	}
-	lockPath := filepath.Join(common, "arw", "registry.lock")
+	lockPath := filepath.Join(common, "awt", "registry.lock")
 	if err := os.MkdirAll(filepath.Dir(lockPath), 0o755); err != nil {
 		return err
 	}
@@ -111,7 +111,7 @@ func (s Store) commitFile(path, contents, message string) error {
 		return fmt.Errorf("registry is busy; try again shortly")
 	}
 	defer os.Remove(lockPath)
-	index, err := os.CreateTemp(filepath.Join(common, "arw"), "registry-index-")
+	index, err := os.CreateTemp(filepath.Join(common, "awt"), "registry-index-")
 	if err != nil {
 		return err
 	}

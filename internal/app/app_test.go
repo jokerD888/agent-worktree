@@ -9,9 +9,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/jokerD888/agent-review-workflow/internal/ledger"
-	"github.com/jokerD888/agent-review-workflow/internal/review"
-	"github.com/jokerD888/agent-review-workflow/internal/task"
+	"github.com/jokerD888/agent-worktree/internal/ledger"
+	"github.com/jokerD888/agent-worktree/internal/review"
+	"github.com/jokerD888/agent-worktree/internal/task"
 )
 
 func TestStackedTasksRequireParentApproval(t *testing.T) {
@@ -21,8 +21,8 @@ func TestStackedTasksRequireParentApproval(t *testing.T) {
 		t.Fatal(err)
 	}
 	runGit(t, repo, "init", "--initial-branch=main")
-	runGit(t, repo, "config", "user.name", "ARW Test")
-	runGit(t, repo, "config", "user.email", "arw-test@example.invalid")
+	runGit(t, repo, "config", "user.name", "AWT Test")
+	runGit(t, repo, "config", "user.email", "awt-test@example.invalid")
 	runGit(t, repo, "commit", "--allow-empty", "-m", "initial")
 	svc, err := New(repo)
 	if err != nil {
@@ -75,7 +75,7 @@ func TestStackedTasksRequireParentApproval(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if merged.TargetBranch != "arw/feature-a" || merged.Task.Lifecycle != task.Merged {
+	if merged.TargetBranch != "awt/feature-a" || merged.Task.Lifecycle != task.Merged {
 		t.Fatalf("child merge result = %#v", merged)
 	}
 	parentAfterMerge, err := svc.Task("feature-a")
@@ -98,8 +98,8 @@ func TestApproveRequiresKnownCleanWorktree(t *testing.T) {
 		t.Fatal(err)
 	}
 	runGit(t, repo, "init", "--initial-branch=main")
-	runGit(t, repo, "config", "user.name", "ARW Test")
-	runGit(t, repo, "config", "user.email", "arw-test@example.invalid")
+	runGit(t, repo, "config", "user.name", "AWT Test")
+	runGit(t, repo, "config", "user.email", "awt-test@example.invalid")
 	runGit(t, repo, "commit", "--allow-empty", "-m", "initial")
 	svc, err := New(repo)
 	if err != nil {
@@ -124,8 +124,8 @@ func TestPrepareReviewDoesNotWriteRegistry(t *testing.T) {
 		t.Fatal(err)
 	}
 	runGit(t, repo, "init", "--initial-branch=main")
-	runGit(t, repo, "config", "user.name", "ARW Test")
-	runGit(t, repo, "config", "user.email", "arw-test@example.invalid")
+	runGit(t, repo, "config", "user.name", "AWT Test")
+	runGit(t, repo, "config", "user.email", "awt-test@example.invalid")
 	runGit(t, repo, "commit", "--allow-empty", "-m", "initial")
 	svc, err := New(repo)
 	if err != nil {
@@ -157,8 +157,8 @@ func TestApproveRejectsHeadChangedSinceReview(t *testing.T) {
 		t.Fatal(err)
 	}
 	runGit(t, repo, "init", "--initial-branch=main")
-	runGit(t, repo, "config", "user.name", "ARW Test")
-	runGit(t, repo, "config", "user.email", "arw-test@example.invalid")
+	runGit(t, repo, "config", "user.name", "AWT Test")
+	runGit(t, repo, "config", "user.email", "awt-test@example.invalid")
 	runGit(t, repo, "commit", "--allow-empty", "-m", "initial")
 	svc, err := New(repo)
 	if err != nil {
@@ -186,8 +186,8 @@ func TestTaskLifecycle(t *testing.T) {
 		t.Fatal(err)
 	}
 	runGit(t, repo, "init", "--initial-branch=main")
-	runGit(t, repo, "config", "user.name", "ARW Test")
-	runGit(t, repo, "config", "user.email", "arw-test@example.invalid")
+	runGit(t, repo, "config", "user.name", "AWT Test")
+	runGit(t, repo, "config", "user.email", "awt-test@example.invalid")
 	runGit(t, repo, "commit", "--allow-empty", "-m", "initial")
 	svc, err := New(repo)
 	if err != nil {
@@ -236,8 +236,8 @@ func TestMergeApprovedTaskFastForwardsRecordedBase(t *testing.T) {
 		t.Fatal(err)
 	}
 	runGit(t, repo, "init", "--initial-branch=main")
-	runGit(t, repo, "config", "user.name", "ARW Test")
-	runGit(t, repo, "config", "user.email", "arw-test@example.invalid")
+	runGit(t, repo, "config", "user.name", "AWT Test")
+	runGit(t, repo, "config", "user.email", "awt-test@example.invalid")
 	runGit(t, repo, "commit", "--allow-empty", "-m", "initial")
 	svc, err := New(repo)
 	if err != nil {
@@ -278,8 +278,8 @@ func TestMergeRejectsTargetThatMovedAfterApproval(t *testing.T) {
 		t.Fatal(err)
 	}
 	runGit(t, repo, "init", "--initial-branch=main")
-	runGit(t, repo, "config", "user.name", "ARW Test")
-	runGit(t, repo, "config", "user.email", "arw-test@example.invalid")
+	runGit(t, repo, "config", "user.name", "AWT Test")
+	runGit(t, repo, "config", "user.email", "awt-test@example.invalid")
 	runGit(t, repo, "commit", "--allow-empty", "-m", "initial")
 	svc, err := New(repo)
 	if err != nil {
@@ -313,8 +313,8 @@ func TestChildReviewRequiresReapprovalWhenParentChanges(t *testing.T) {
 		t.Fatal(err)
 	}
 	runGit(t, repo, "init", "--initial-branch=main")
-	runGit(t, repo, "config", "user.name", "ARW Test")
-	runGit(t, repo, "config", "user.email", "arw-test@example.invalid")
+	runGit(t, repo, "config", "user.name", "AWT Test")
+	runGit(t, repo, "config", "user.email", "awt-test@example.invalid")
 	runGit(t, repo, "commit", "--allow-empty", "-m", "initial")
 	svc, err := New(repo)
 	if err != nil {
@@ -378,8 +378,8 @@ func TestClearMergedTaskDeletesBranchAndWorktree(t *testing.T) {
 		t.Fatal(err)
 	}
 	runGit(t, repo, "init", "--initial-branch=main")
-	runGit(t, repo, "config", "user.name", "ARW Test")
-	runGit(t, repo, "config", "user.email", "arw-test@example.invalid")
+	runGit(t, repo, "config", "user.name", "AWT Test")
+	runGit(t, repo, "config", "user.email", "awt-test@example.invalid")
 	runGit(t, repo, "commit", "--allow-empty", "-m", "initial")
 	svc, err := New(repo)
 	if err != nil {
@@ -400,10 +400,10 @@ func TestClearMergedTaskDeletesBranchAndWorktree(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Clear() error = %v", err)
 	}
-	if result.Branch != "arw/feature-a" {
+	if result.Branch != "awt/feature-a" {
 		t.Fatalf("clear result branch = %s", result.Branch)
 	}
-	if svc.Git.BranchExists("arw/feature-a") {
+	if svc.Git.BranchExists("awt/feature-a") {
 		t.Fatal("branch still exists after clear")
 	}
 	if _, err := os.Stat(started.Worktree); !os.IsNotExist(err) {
@@ -426,8 +426,8 @@ func TestClearRejectsActiveTask(t *testing.T) {
 		t.Fatal(err)
 	}
 	runGit(t, repo, "init", "--initial-branch=main")
-	runGit(t, repo, "config", "user.name", "ARW Test")
-	runGit(t, repo, "config", "user.email", "arw-test@example.invalid")
+	runGit(t, repo, "config", "user.name", "AWT Test")
+	runGit(t, repo, "config", "user.email", "awt-test@example.invalid")
 	runGit(t, repo, "commit", "--allow-empty", "-m", "initial")
 	svc, err := New(repo)
 	if err != nil {
@@ -448,8 +448,8 @@ func TestClearMergedBatch(t *testing.T) {
 		t.Fatal(err)
 	}
 	runGit(t, repo, "init", "--initial-branch=main")
-	runGit(t, repo, "config", "user.name", "ARW Test")
-	runGit(t, repo, "config", "user.email", "arw-test@example.invalid")
+	runGit(t, repo, "config", "user.name", "AWT Test")
+	runGit(t, repo, "config", "user.email", "awt-test@example.invalid")
 	runGit(t, repo, "commit", "--allow-empty", "-m", "initial")
 	svc, err := New(repo)
 	if err != nil {
@@ -487,10 +487,10 @@ func TestClearMergedBatch(t *testing.T) {
 	if len(results) != 2 {
 		t.Fatalf("ClearMerged() results = %d, want 2", len(results))
 	}
-	if svc.Git.BranchExists("arw/task-a") || svc.Git.BranchExists("arw/task-b") {
+	if svc.Git.BranchExists("awt/task-a") || svc.Git.BranchExists("awt/task-b") {
 		t.Fatal("merged/abandoned branches still exist")
 	}
-	if !svc.Git.BranchExists("arw/task-c") {
+	if !svc.Git.BranchExists("awt/task-c") {
 		t.Fatal("active branch was cleared")
 	}
 }
@@ -502,8 +502,8 @@ func TestChildMergeAfterParentCleared(t *testing.T) {
 		t.Fatal(err)
 	}
 	runGit(t, repo, "init", "--initial-branch=main")
-	runGit(t, repo, "config", "user.name", "ARW Test")
-	runGit(t, repo, "config", "user.email", "arw-test@example.invalid")
+	runGit(t, repo, "config", "user.name", "AWT Test")
+	runGit(t, repo, "config", "user.email", "awt-test@example.invalid")
 	runGit(t, repo, "commit", "--allow-empty", "-m", "initial")
 	svc, err := New(repo)
 	if err != nil {
@@ -564,8 +564,8 @@ func TestChildMergeParentMergedNotCleared(t *testing.T) {
 		t.Fatal(err)
 	}
 	runGit(t, repo, "init", "--initial-branch=main")
-	runGit(t, repo, "config", "user.name", "ARW Test")
-	runGit(t, repo, "config", "user.email", "arw-test@example.invalid")
+	runGit(t, repo, "config", "user.name", "AWT Test")
+	runGit(t, repo, "config", "user.email", "awt-test@example.invalid")
 	runGit(t, repo, "commit", "--allow-empty", "-m", "initial")
 	svc, err := New(repo)
 	if err != nil {
@@ -609,8 +609,8 @@ func TestChildMergeParentAbandoned(t *testing.T) {
 		t.Fatal(err)
 	}
 	runGit(t, repo, "init", "--initial-branch=main")
-	runGit(t, repo, "config", "user.name", "ARW Test")
-	runGit(t, repo, "config", "user.email", "arw-test@example.invalid")
+	runGit(t, repo, "config", "user.name", "AWT Test")
+	runGit(t, repo, "config", "user.email", "awt-test@example.invalid")
 	runGit(t, repo, "commit", "--allow-empty", "-m", "initial")
 	svc, err := New(repo)
 	if err != nil {
@@ -644,8 +644,8 @@ func TestGrandchildChainAfterParentCleared(t *testing.T) {
 		t.Fatal(err)
 	}
 	runGit(t, repo, "init", "--initial-branch=main")
-	runGit(t, repo, "config", "user.name", "ARW Test")
-	runGit(t, repo, "config", "user.email", "arw-test@example.invalid")
+	runGit(t, repo, "config", "user.name", "AWT Test")
+	runGit(t, repo, "config", "user.email", "awt-test@example.invalid")
 	runGit(t, repo, "commit", "--allow-empty", "-m", "initial")
 	svc, err := New(repo)
 	if err != nil {
